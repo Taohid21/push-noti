@@ -9,7 +9,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// ── Firebase Admin initialize (Fixed for Render & \n PEM Key issue) ──
+// ── Firebase Admin initialize (Fixed for Render, CRICTON & \n PEM Key issue) ──
 let serviceAccount;
 
 try {
@@ -23,7 +23,8 @@ try {
 } catch (err) {
   console.error('Error loading Service Account:', err.message);
 }
-if (serviceAccount) {
+
+if (serviceAccount && !admin.apps.length) {
   // Fix for 'invalid_grant / Invalid JWT Signature' on Render & Docker
   if (typeof serviceAccount.private_key === 'string') {
     serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
@@ -31,13 +32,14 @@ if (serviceAccount) {
 
   try {
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
+      credential: admin.credential.cert(serviceAccount),
+      projectId: serviceAccount.project_id || 'new-all-f99f7'
     });
-    console.log('Firebase Admin initialized successfully!');
+    console.log('CRICTON Firebase Admin initialized for project:', serviceAccount.project_id || 'new-all-f99f7');
   } catch (e) {
     console.error('Firebase Admin init error:', e.message);
   }
-} else {
+} else if (!serviceAccount) {
   console.error('CRITICAL: No Service Account Key found!');
 }
 
@@ -84,7 +86,7 @@ async function verifyPassword(appId, password) {
 // ════════════════════════════════════════════════════════════
 
 app.get('/', (req, res) => {
-  res.send('Wevlo Push Notification Server is Running Successfully!');
+  res.send('CRICTON Push Notification Server is Running Successfully!');
 });
 
 // ── Register App ──
@@ -162,7 +164,7 @@ app.get('/tokens', async (req, res) => {
   const appIdentifier = isValidAppId(appId) ? appId : 'cricton_web_app';
 
   if (password && isValidAppId(appId)) {
-    const auth = await verifyPassword(appId, password);
+    const auth = await verifyPassword(appIdentifier, password);
     if (!auth.ok && auth.reason !== 'app_not_registered' && auth.reason !== 'no_password_set') {
       return res.status(401).json({ success: false, error: auth.reason });
     }
@@ -209,7 +211,7 @@ app.post('/send-notification', async (req, res) => {
       }));
 
       const result = await admin.messaging().sendEach(messages);
-      console.log(`[${appIdentifier}] Broadcast Sent: ${result.successCount} ok, ${result.failureCount} failed`);
+      console.log(`[${appIdentifier}] CRICTON Broadcast Sent: ${result.successCount} ok, ${result.failureCount} failed`);
 
       return res.json({
         success:      true,
@@ -306,4 +308,4 @@ app.delete('/token', async (req, res) => {
 
 // ════════════════════════════════════════════════════════════
 const PORT = process.env.PORT || 7860;
-app.listen(PORT, () => console.log(`Wevlo Push Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`CRICTON Push Server running on port ${PORT}`));
