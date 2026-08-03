@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wevlo Push — Test Device</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1220; --surface:#141A2C; --surface-raised:#1C2439; --border:#2A3350;
+    --text:#E8ECF5; --text-muted:#8C95B3; --text-dim:#5C6584;
+    --signal:#46C9A5; --signal-soft:rgba(70,201,165,.14); --signal-bright:#6EEBC4;
+    --alert:#FF6B5B; --alert-soft:rgba(255,107,91,.14);
+    --radius-lg:16px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:radial-gradient(circle at 1px 1px, rgba(70,201,165,.06) 1px, transparent 1px) 0 0/28px 28px, var(--bg);
+    color:var(--text); font-family:'IBM Plex Sans',system-ui,sans-serif; min-height:100vh;
+  }
+  .wrap{max-width:560px;margin:0 auto;padding:32px 20px 80px;}
+  header{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+  .brand-mark{
+    width:38px;height:38px;border-radius:10px;flex-shrink:0;
+    background:linear-gradient(135deg, var(--signal), #2E9E82);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 0 1px rgba(70,201,165,.35), 0 8px 20px -8px rgba(70,201,165,.6);
+  }
+  .brand-mark svg{width:20px;height:20px;}
+  h1{font-family:'Space Grotesk',sans-serif;font-size:19px;margin:0;font-weight:700;}
+  header span{font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.04em;}
+  p.lede{color:var(--text-muted);font-size:13.5px;line-height:1.6;margin:14px 0 26px;}
+
+  .device-orb{
+    width:120px;height:120px;margin:0 auto 24px;position:relative;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .device-orb .ring{position:absolute;inset:0;border-radius:50%;border:1px solid var(--border);}
+  .device-orb .ring.r2{inset:14px;}
+  .device-orb .core{
+    width:64px;height:64px;border-radius:50%;
+    background:var(--surface-raised);border:1.5px solid var(--border);
+    display:flex;align-items:center;justify-content:center;font-size:26px;
+    transition:border-color .3s, box-shadow .3s;
+  }
+  .device-orb.connected .core{border-color:var(--signal);box-shadow:0 0 0 6px var(--signal-soft);}
+  .device-orb.connected .ring{border-color:rgba(70,201,165,.25);animation:orb-pulse 2.4s ease-out infinite;}
+  .device-orb.connected .ring.r2{animation-delay:.6s;}
+  @keyframes orb-pulse{
+    0%{transform:scale(.85);opacity:.9;}
+    100%{transform:scale(1.25);opacity:0;}
+  }
+
+  .status-line{text-align:center;font-size:13px;color:var(--text-muted);margin-bottom:26px;}
+  .status-line b{color:var(--signal-bright);}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;}
+  .card + .card{margin-top:16px;}
+  .card h2{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;margin:0 0 12px;}
+
+  label{display:block;font-size:12px;color:var(--text-muted);margin:12px 0 6px;}
+  label:first-child{margin-top:0;}
+  input[type=text],input[type=password]{
+    width:100%;background:var(--surface-raised);border:1px solid var(--border);
+    border-radius:8px;padding:10px 12px;color:var(--text);font-size:13.5px;font-family:'IBM Plex Sans',sans-serif;
+  }
+  input.mono{font-family:'JetBrains Mono',monospace;font-size:12px;}
+  input:focus{outline:none;border-color:var(--signal);box-shadow:0 0 0 3px var(--signal-soft);}
+
+  .field-row{display:flex;gap:10px;}
+  .field-row > div{flex:1;}
+
+  .btn{
+    width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
+    background:linear-gradient(135deg, var(--signal), #2E9E82);color:#08150F;font-weight:600;
+    border:none;padding:12px 16px;border-radius:8px;font-size:14px;cursor:pointer;margin-top:18px;
+    font-family:'IBM Plex Sans',sans-serif;transition:filter .12s;
+  }
+  .btn:hover{filter:brightness(1.06);}
+  .btn:active{transform:scale(.99);}
+  .btn[disabled]{opacity:.5;cursor:not-allowed;}
+  .btn.secondary{background:var(--surface-raised);color:var(--text);border:1px solid var(--border);margin-top:10px;}
+
+  .token-box{
+    background:#090D17;border:1px solid var(--border);border-radius:8px;padding:12px;
+    font-family:'JetBrains Mono',monospace;font-size:11px;word-break:break-all;color:var(--text-muted);
+    max-height:70px;overflow-y:auto;
+  }
+  .copy-hint{font-size:11px;color:var(--text-dim);margin-top:6px;}
+  a.copy-hint{color:var(--signal);cursor:pointer;text-decoration:none;}
+
+  details{margin-top:6px;}
+  summary{cursor:pointer;font-size:12px;color:var(--text-dim);}
+  summary:hover{color:var(--text-muted);}
+
+  .feed{display:flex;flex-direction:column;gap:10px;max-height:340px;overflow-y:auto;}
+  .feed-empty{text-align:center;padding:34px 14px;color:var(--text-dim);font-size:13px;border:1px dashed var(--border);border-radius:12px;}
+  .notif{
+    background:var(--surface-raised);border:1px solid var(--border);border-left:3px solid var(--signal);
+    border-radius:8px;padding:12px 14px;animation:slide-in .25s ease-out;
+  }
+  @keyframes slide-in{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+  .notif .title{font-weight:600;font-size:13.5px;margin-bottom:3px;}
+  .notif .body{font-size:12.5px;color:var(--text-muted);line-height:1.5;}
+  .notif img{max-width:100%;border-radius:6px;margin-top:8px;display:block;}
+  .notif .time{font-size:10.5px;color:var(--text-dim);margin-top:6px;font-family:'JetBrains Mono',monospace;}
+
+  .msg{font-size:12px;padding:10px 12px;border-radius:8px;margin-top:12px;}
+  .msg.err{background:var(--alert-soft);color:#FFB4AA;border:1px solid rgba(255,107,91,.3);}
+  .msg.ok{background:var(--signal-soft);color:var(--signal-bright);border:1px solid rgba(70,201,165,.3);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand-mark">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2 L12 14" stroke="#08150F" stroke-width="2" stroke-linecap="round"/>
+        <path d="M6 8 C6 4.7 8.7 2 12 2 C15.3 2 18 4.7 18 8" stroke="#08150F" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <circle cx="12" cy="19" r="2.4" fill="#08150F"/>
+      </svg>
+    </div>
+    <div>
+      <h1>Wevlo Push</h1>
+      <span>Test Device</span>
+    </div>
+  </header>
+  <p class="lede">এই পেজটা একটা ভার্চুয়াল ডিভাইস — কানেক্ট করলে এটা পুশ সার্ভারে নিজের FCM টোকেন রেজিস্টার করবে এবং অ্যাডমিন প্যানেল থেকে পাঠানো নোটিফিকেশন এখানে সরাসরি দেখা যাবে।</p>
+
+  <div class="device-orb" id="orb">
+    <div class="ring"></div>
+    <div class="ring r2"></div>
+    <div class="core" id="orbIcon">📴</div>
+  </div>
+  <div class="status-line" id="statusLine">ডিভাইস সংযুক্ত নয়</div>
+
+  <div class="card" id="setupCard">
+    <h2>১. পুশ সার্ভার</h2>
+    <label>Server Base URL</label>
+    <input type="text" id="baseUrl" class="mono" value="https://pushserver-37wj.onrender.com">
+    <div class="field-row">
+      <div>
+        <label>App ID</label>
+        <input type="text" id="appId" class="mono" placeholder="com.example.myapp">
+      </div>
+      <div>
+        <label>পাসওয়ার্ড <span style="color:var(--text-dim);">(ঐচ্ছিক)</span></label>
+        <input type="password" id="appPassword" placeholder="যদি সেট করা থাকে">
+      </div>
+    </div>
+
+    <h2 style="margin-top:22px;">২. VAPID Key</h2>
+    <p class="lede" style="margin:0 0 10px;font-size:12px;">Firebase Console → Project settings → Cloud Messaging → Web configuration → Web Push certificates থেকে Key নিন।</p>
+    <label>VAPID Key</label>
+    <input type="text" id="fbVapidKey" class="mono" placeholder="B...">
+
+    <button class="btn" id="connectBtn" onclick="connectDevice()">নোটিফিকেশন পারমিশন দিন ও কানেক্ট করুন</button>
+    <div id="setupMsg"></div>
+  </div>
+
+  <div class="card hidden" id="connectedCard" style="display:none;">
+    <h2>ডিভাইস টোকেন</h2>
+    <div class="token-box" id="tokenBox">—</div>
+    <div class="copy-hint"><a onclick="copyToken()">টোকেন কপি করুন</a></div>
+    <button class="btn secondary" onclick="disconnectDevice()">ডিসকানেক্ট করুন</button>
+  </div>
+
+  <div class="card">
+    <h2>রিসিভড নোটিফিকেশন</h2>
+    <div class="feed" id="feed">
+      <div class="feed-empty">এখনো কোনো নোটিফিকেশন আসেনি। ট্যাব খোলা থাকলে ফোরগ্রাউন্ডে, নাহলে ব্যাকগ্রাউন্ডে সিস্টেম নোটিফিকেশন হিসেবে আসবে।</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+<script>
+let currentToken = null;
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA1oGWkI4OyUtq1Oe-4a0i2u7oF_EkyvRk",
+  authDomain: "pushserver-8159b.firebaseapp.com",
+  projectId: "pushserver-8159b",
+  storageBucket: "pushserver-8159b.firebasestorage.app",
+  messagingSenderId: "1055841977627",
+  appId: "1:1055841977627:web:c97d8cca69cec84bfe7fbe"
+};
+
+function setMsg(text, ok){
+  const el = document.getElementById('setupMsg');
+  el.innerHTML = `<div class="msg ${ok ? 'ok' : 'err'}">${text}</div>`;
+}
+
+function readConfig(){
+  return firebaseConfig;
+}
+
+async function connectDevice(){
+  const btn = document.getElementById('connectBtn');
+  const baseUrl = document.getElementById('baseUrl').value.replace(/\/$/, '');
+  const pushAppId = document.getElementById('appId').value.trim();
+  const password = document.getElementById('appPassword').value;
+  const vapidKey = document.getElementById('fbVapidKey').value.trim();
+  const cfg = readConfig();
+
+  if(!pushAppId){ setMsg('App ID দিন', false); return; }
+  if(!vapidKey){ setMsg('VAPID Key দিন', false); return; }
+  if(!('serviceWorker' in navigator)){ setMsg('এই ব্রাউজার Service Worker সাপোর্ট করে না', false); return; }
+
+  btn.disabled = true;
+  setMsg('পারমিশন চাওয়া হচ্ছে…', true);
+
+  try{
+    const permission = await Notification.requestPermission();
+    if(permission !== 'granted'){
+      setMsg('নোটিফিকেশন পারমিশন দেওয়া হয়নি — ব্রাউজার সেটিংস থেকে অনুমতি দিন', false);
+      btn.disabled = false;
+      return;
+    }
+
+    const registration = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
+    await navigator.serviceWorker.ready;
+
+    firebase.initializeApp(cfg);
+    const messaging = firebase.messaging();
+
+    const token = await messaging.getToken({ vapidKey, serviceWorkerRegistration: registration });
+    if(!token){
+      setMsg('টোকেন পাওয়া যায়নি — Firebase কনফিগারেশন যাচাই করুন', false);
+      btn.disabled = false;
+      return;
+    }
+    currentToken = token;
+
+    // পুশ সার্ভারে রেজিস্টার করা হচ্ছে
+    const res = await fetch(baseUrl + '/register-token', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ token, appId: pushAppId, userAgent: navigator.userAgent, ...(password ? {password} : {}) })
+    });
+    const data = await res.json();
+    if(!data.success){
+      setMsg('সার্ভারে রেজিস্টার ব্যর্থ: ' + data.error, false);
+      btn.disabled = false;
+      return;
+    }
+
+    document.getElementById('orb').classList.add('connected');
+    document.getElementById('orbIcon').textContent = '📶';
+    document.getElementById('statusLine').innerHTML = `<b>${pushAppId}</b> এ সংযুক্ত ও লাইভ`;
+    document.getElementById('tokenBox').textContent = token;
+    document.getElementById('connectedCard').style.display = 'block';
+    setMsg('সফলভাবে কানেক্ট হয়েছে — এখন অ্যাডমিন প্যানেল থেকে টেস্ট নোটিফিকেশন পাঠান', true);
+
+    // ফোরগ্রাউন্ড মেসেজ হ্যান্ডলার — ডেটা-ওনলি পেলোড তাই ম্যানুয়ালি রেন্ডার করতে হয়
+    messaging.onMessage((payload) => {
+      addToFeed(payload.data || {});
+      if(Notification.permission === 'granted' && document.visibilityState === 'visible'){
+        // ট্যাব খোলা থাকলেও একটা সিস্টেম নোটিফিকেশন দেখানো হচ্ছে যাতে মিস না হয়
+        registration.showNotification((payload.data && payload.data.title) || 'নোটিফিকেশন', {
+          body: (payload.data && payload.data.body) || '',
+          icon: payload.data && payload.data.imageUrl
+        });
+      }
+    });
+
+  }catch(e){
+    setMsg('কানেক্ট করতে ব্যর্থ: ' + e.message, false);
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+function addToFeed(data){
+  const feed = document.getElementById('feed');
+  if(feed.querySelector('.feed-empty')) feed.innerHTML = '';
+  const card = document.createElement('div');
+  card.className = 'notif';
+  const time = new Date().toLocaleTimeString('en-GB');
+  card.innerHTML = `
+    <div class="title">${escapeHtml(data.title || 'নোটিফিকেশন')}</div>
+    <div class="body">${escapeHtml(data.body || '')}</div>
+    ${data.imageUrl ? `<img src="${data.imageUrl}" alt="">` : ''}
+    <div class="time">${time}</div>`;
+  feed.prepend(card);
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function copyToken(){
+  if(!currentToken) return;
+  navigator.clipboard.writeText(currentToken);
+  setMsg('টোকেন কপি হয়েছে', true);
+}
+
+function disconnectDevice(){
+  document.getElementById('orb').classList.remove('connected');
+  document.getElementById('orbIcon').textContent = '📴';
+  document.getElementById('statusLine').textContent = 'ডিভাইস সংযুক্ত নয়';
+  document.getElementById('connectedCard').style.display = 'none';
+  currentToken = null;
+  setMsg('ডিসকানেক্ট হয়েছে (টোকেন এখনো সার্ভারে থাকতে পারে, প্রয়োজনে অ্যাডমিন প্যানেল থেকে মুছুন)', true);
+}
+</script>
+</body>
+</html>
