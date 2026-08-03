@@ -13,17 +13,16 @@ app.use(bodyParser.json());
 let serviceAccount;
 
 try {
-  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  if (fs.existsSync('./serviceAccountKey.json')) {
+    serviceAccount = require('./serviceAccountKey.json');
+  } else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     serviceAccount = typeof process.env.FIREBASE_SERVICE_ACCOUNT === 'string' 
       ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT) 
       : process.env.FIREBASE_SERVICE_ACCOUNT;
-  } else if (fs.existsSync('./serviceAccountKey.json')) {
-    serviceAccount = require('./serviceAccountKey.json');
   }
 } catch (err) {
   console.error('Error loading Service Account:', err.message);
 }
-
 if (serviceAccount) {
   // Fix for 'invalid_grant / Invalid JWT Signature' on Render & Docker
   if (typeof serviceAccount.private_key === 'string') {
